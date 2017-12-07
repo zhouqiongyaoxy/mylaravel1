@@ -11,8 +11,9 @@
 |
 */
 
-Route::get('/','TestController@index', function () {
-    //return view('index',['name' => 'xzz']);
+Route::get('/', function () {
+   // return view('index',['name' => 'xzz']);
+    return redirect('home');
 });
 /*Route::get('/', function () {
     return redirect()->action('TestController@test'); // redirect的必需已经定义过路由
@@ -26,6 +27,20 @@ Route::any('test','TestController@test', function () {
 Route::any('synclg','TestController@getLgPositions', function () {
     //
 });
-/*Route::get('/test', function () {
-    return view('test');
-});*/
+Route::any('w2t/{path}','TestController@wordToTxt', function () {
+    //把word文档转成txt格式
+});
+
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+
+Route::post('phone/code', 'ApiController@sendVerifyCode');
+/*Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');*/
