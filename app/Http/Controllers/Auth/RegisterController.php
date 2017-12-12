@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\User;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use App\Http\Helper\Configs;
+use Illuminate\Support\Facades\DB;
 
 class RegisterController extends Controller
 {
@@ -22,6 +25,27 @@ class RegisterController extends Controller
 
     use RegistersUsers;
 
+    //复写RegistersUsers里的此方法
+    public function showRegistrationForm()
+    {
+        $questions = Configs::passwordQuestion();
+        return view('auth.register',['questions' => $questions]);
+    }
+
+    //注册时名称唯一性验证
+    public function namecheck()
+    {
+        $params = Input::get();
+        $params['name'] = trim($params['name']);
+        if (empty($params['name'])) {
+            return ['code' => -1, 'msg' => '用户名长度不能为0或全空格'];
+        }
+        $user = DB::table('users')->where('name', $params['name'])->first();
+        if (!empty($user)) {
+            return ['code' => 0, 'msg' => '该用户已存在,请选用其它用户名'];
+        }
+        return ['code' => 1, 'msg' => '用户名唯一性验证通过'];
+    }
     /**
      * Where to redirect users after registration.
      *
@@ -62,10 +86,19 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        $secretQues = [];
+        if ($data['first-question'] != -1) {
+            $secretQues[1] = $data['first-question-answer'];
+        }
+        if ($data['second-question'] != -1) {
+            $secretQues[2] = $data['second-question-answer'];
+        }
+       // print_r($data);print_r(json_encode($secretQues));exit();
         return User::create([
             'name' => $data['name'],
             //'email' => $data['email'],
             'password' => bcrypt($data['password']),
+            'password_question_answers'  => json_encode($secretQues),
         ]);
     }
 }

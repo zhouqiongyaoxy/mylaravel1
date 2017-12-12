@@ -68,7 +68,7 @@
                                     Login
                                 </button>
 
-                                <a class="btn btn-link" href="{{ route('password.request') }}">
+                                <a class="btn btn-link" href="{{ route('password.answerquestions') }}">
                                     Forgot Your Password?
                                 </a>
                             </div>
