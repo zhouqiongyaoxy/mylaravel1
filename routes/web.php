@@ -38,7 +38,7 @@ Route::any('getRegisterQuestions', 'Auth\ForgotPasswordController@getRegisterQue
     Route::post('register/namecheck', 'RegisterController@namecheck');
 });*/
 
-
+Route::any('/getbooklst', 'BookController@getBookList');
 
 Auth::routes();//定义在/vendor/laravel/framework/src/Illuminate/Routing/Router.php中
 

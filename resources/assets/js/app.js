@@ -18,6 +18,10 @@ window.Vue = require('vue');
 
 Vue.component('example-component', require('./components/ExampleComponent.vue'));
 Vue.component('send-code-field',   require('./components/SendCodeField.vue'));
+Vue.component('book-list',   require('./components/BookList.vue'));
+Vue.component('setting-page',   require('./components/SettingPage.vue'));
+
+
 
 const app = new Vue({
     el: '#app'
