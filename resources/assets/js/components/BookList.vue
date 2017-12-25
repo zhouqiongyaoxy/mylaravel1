@@ -40,41 +40,44 @@
                 </div>
             </div>
             <div class="form-group search_group" style="margin-top: 26px;">
-                <a id="btn_search" @click="search"  href="javascript:void(0);" style="padding: 4px 12px;" class="btn btn-default">
+                <a id="btn_search" @click="getData"  href="javascript:void(0);" style="padding: 4px 12px;" class="btn btn-default">
                     <i class="fa fa-search"></i>
                     搜索
                 </a>
             </div>
         </div>
-        <div style="clear:both;"></div>
-        <table>
+        <div style="clear:both;">
+            <button  class="btn btn-default">新增书箱</button>
+        </div>
+        <table  class="table table-hover">
             <thead>
-            <tr>
-                <th width="30%">书名</th>
-                <th width="40%">封面</th>
-                <th width="10%">类别</th>
-                <!--<th width="10%">语言</th>
-                <th width="10%">在架状态</th>-->
-            </tr>
+                <tr>
+                    <th width="25%">书名</th>
+                    <th width="35%">封面</th>
+                    <th width="10%">类别</th>
+                    <th width="5%">语言</th>
+                    <th width="10%">在架状态</th>
+                    <th width="15%">操作</th>
+                </tr>
             </thead>
             <tbody id="booklist">
                 <tr v-if="listData.length>0" v-for="item in listData">
-                    <th scope="row">{{item.id}}</th>
-                    <td>{{item.name}}</td>
+                    <td scope="row">{{item.name}}</td>
+                    <td>{{item.cover}}</td>
+                    <td>{{item.category}}</td>
+                    <td>{{item.language}}</td>
+                    <td>{{item.status}}</td>
                     <td>
-                        <button v-on:click="editItem(item.id)" class="btn btn-default" >编辑</button>
-                        <button v-on:click="deleteItem(item.id)" class="btn btn-default" >删除</button>
+                        <button v-on:click="editBook(item.id)" class="btn btn-default" >编辑</button>
+                        <button v-if="item.status==1" v-on:click="sendBook(item.id)" class="btn btn-default">借出</button>
+                        <button v-else-if="item.status==2" v-on:click="returnBook(item.id)" class="btn btn-default">收回</button>
+                        <button v-on:click="deleteBook(item.id)" class="btn btn-default" >删除</button>
                     </td>
                 </tr>
-                <!--<tr id="v-for-message">
-                    <td v-for="val in message">
-                        {{ val }}
-                    </td>
-                </tr>-->
             </tbody>
             <tfoot>
             <tr>
-                <td colspan=3>
+                <td colspan=6>
                     <div id="pagelist">
                         <div class="row">
                             <div class="col-sm-6" style="width: 9%;margin-top: 20px;">
@@ -164,55 +167,45 @@
 </template>
 <style type="text/css">
     .search_group{float:left;margin-right: 25px;}
+    .btn{padding: 2px 4px;margin: 1px 2px;}
 </style>
 
 <script>
-
-
-    function getData($page,$pageSize){//获取数据，可使用各种语言替换^_^
-        var $data = [];
-        for (var $i=($page-1)*$pageSize+1; $i <=$page*$pageSize ; $i++) {
-            $data.push( {
-                id:$i,
-                name:'name'+$i
-            });
-        }
-        var $returnData = {'data':$data,'total':103};
-        return $returnData;
-    }
     export default{
         created(){
-            //this.search();
-            this.listItems();
+            this.getData();
         },
         methods:{
-            search(){
+            getData: function () {
                 var params = {
                     'name' : this.name,
                     'category' : this.category,
                     'language' : this.language,
-                    'status' : this.status
+                    'status' : this.status,
+                    'pageNo' : this.page,
+                    'pageSize' : this.pageSize
                 };
-                console.log(params);
                 axios.post('/getbooklst', params)
-                        .then(function (response) {
-                            console.log(response);
+                        .then((response) => {
+                            this.listData = response.data.data;
+                            this.total = response.data.total;
+                            this.setPageList(this.total, this.page, this.pageSize);
                         })
-                        .then(function (error) {
+                        .catch(function (error) {
                             console.log(error)
                         })
             },
-            listItems: function () {//列出需要的数据
-                var returnData =getData(this.page,this.pageSize);
-                this.listData = returnData.data;
-                this.total=returnData['total'];
-                this.setPageList(this.total, this.page, this.pageSize);
-            },
-            editItem:function ($id) {//编辑操作在这儿哟
+            editBook:function ($id) {
                 alert('编辑第'+$id+'条数据！');
             },
-            deleteItem:function ($id) {//这里可以删除数据
+            deleteBook:function ($id) {
                 alert('删除第'+$id+'条数据！');
+            },
+            sendBook:function ($id) {
+                alert('借出第'+$id+'条数据！');
+            },
+            returnBook:function ($id) {
+                alert('收回第'+$id+'条数据！');
             },
             setPageList: function (total, page, pageSize) {
                 total = parseInt(total);
@@ -257,12 +250,12 @@
             requestAgain: function (pageSize) {
                 this.page = 1;
                 this.pageSize = pageSize;
-                this.listItems();
+                this.getData();
             },
             changeCurPage: function (page, pageSize) {//换页
                 this.page = page;
                 this.pageSize = pageSize;
-                this.listItems();
+                this.getData();
             },
             goPage: function (pageSize, totalPage) {//跳转页
                 var pageIndex = this.$refs.goPage.value;
@@ -298,11 +291,5 @@
                 }
             }
         },
-        /*data(){
-
-            var msg = ['sdfsdfsf','dsfdffsf','ssss','66666','23wedssfdaf'];
-            return{ message:msg
-            }
-        }*/
     }
 </script>
