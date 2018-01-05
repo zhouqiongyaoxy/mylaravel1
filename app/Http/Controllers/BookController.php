@@ -38,4 +38,6 @@ class BookController extends Controller
                     ->get();*/
         return $rs;
     }
+
+    // todo 做设置,列表显示要转成对应的设置选项 新增 编辑 删除 借出与收回(新增数据表,人,时间,电话等)
 }

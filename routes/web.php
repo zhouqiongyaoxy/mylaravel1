@@ -39,6 +39,9 @@ Route::any('getRegisterQuestions', 'Auth\ForgotPasswordController@getRegisterQue
 });*/
 
 Route::any('/getbooklst', 'BookController@getBookList');
+Route::any('/saveDict', 'SettingController@saveDict');
+Route::any('/getDictList', 'SettingController@getDictList');
+Route::any('/deleteDict', 'SettingController@deleteDict');
 
 Auth::routes();//定义在/vendor/laravel/framework/src/Illuminate/Routing/Router.php中
 
