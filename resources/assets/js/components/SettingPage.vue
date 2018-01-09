@@ -43,7 +43,7 @@
                                     <td scope="row">{{item.set_value}}</td>
                                     <td>
                                         <button v-on:click="editDict(item)" class="btn btn-default" >编辑</button>
-                                        <button v-on:click="deleteDict(item.id)" class="btn btn-default" >删除</button>
+                                        <button v-on:click="deleteDict(item)" class="btn btn-default" >删除</button>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -164,8 +164,8 @@
                 $("#addNewDictDiv").css('display', 'block');
                 $("#modalTitle").text("编辑字典数据");
             },
-            deleteDict: function (id) {
-                axios.post('/deleteDict', {id:id})
+            deleteDict: function (item) {
+                axios.post('/deleteDict', {id:item.id, set_key:item.set_key})
                         .then((response) => {
                             if (response.data.code == 1) {
                                 this.getDictList($('#setkeyList').val());

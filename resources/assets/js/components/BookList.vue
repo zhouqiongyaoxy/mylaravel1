@@ -10,32 +10,21 @@
             <div class="form-group search_group">
                 <label for="category" class="control-label no-padding-right">类别：</label>
                 <div class="search_div">
-                    <select class="form-control input-sm" name="category" id="category" v-model="category">
-                        <option value="0">--全部--</option>
-                        <option value="1">计算机</option>
-                        <option value="2">经济学</option>
-                        <option value="3">英语</option>
+                    <select class="form-control input-sm" name="category" id="category">
                     </select>
                 </div>
             </div>
             <div class="form-group search_group">
                 <label for="status" class="control-label no-padding-right">在架状态：</label>
                 <div class="search_div">
-                    <select class="form-control input-sm" name="status" id="status" v-model="status">
-                        <option value="0">--全部--</option>
-                        <option value="1">在架</option>
-                        <option value="2">借出</option>
-                        <option value="3">送人</option>
+                    <select class="form-control input-sm" name="status" id="status">
                     </select>
                 </div>
             </div>
             <div class="form-group search_group">
                 <label for="language" class="control-label no-padding-right">语言：</label>
                 <div class="search_div">
-                    <select class="form-control input-sm" name="language" id="language" v-model="language">
-                        <option value="0">--全部--</option>
-                        <option value="1">中文</option>
-                        <option value="2">英文</option>
+                    <select class="form-control input-sm" name="language" id="language">
                     </select>
                 </div>
             </div>
@@ -47,7 +36,7 @@
             </div>
         </div>
         <div style="clear:both;">
-            <button  class="btn btn-default">新增书箱</button>
+            <button  class="btn btn-default">新增书籍</button>
         </div>
         <table  class="table table-hover">
             <thead>
@@ -64,9 +53,9 @@
                 <tr v-if="listData.length>0" v-for="item in listData">
                     <td scope="row">{{item.name}}</td>
                     <td>{{item.cover}}</td>
-                    <td>{{item.category}}</td>
-                    <td>{{item.language}}</td>
-                    <td>{{item.status}}</td>
+                    <td>{{dictList.book_category[item.category]}}</td>
+                    <td>{{dictList.book_language[item.language]}}</td>
+                    <td>{{statusList[item.status]}}</td>
                     <td>
                         <button v-on:click="editBook(item.id)" class="btn btn-default" >编辑</button>
                         <button v-if="item.status==1" v-on:click="sendBook(item.id)" class="btn btn-default">借出</button>
@@ -173,21 +162,62 @@
 <script>
     export default{
         created(){
+            this.getDicts();
             this.getData();
         },
         methods:{
+            getDicts: function () {
+                axios.post('/getDictList', {setkey_like: 'book_'})
+                        .then((response) => {
+                            var dicts = {};
+                            var lanstr = '<option value="0">--全部--</option>';
+                            var catstr = '<option value="0">--全部--</option>';
+                            for(var i in response.data) {
+                                if (!dicts[response.data[i]['set_key']]) {
+                                    dicts[response.data[i]['set_key']] = [];
+                                }
+                                if (response.data[i]['set_key'] == 'book_language') {
+                                    lanstr += '<option value="' + response.data[i]['id'] + '">' + response.data[i]['set_value'] + '</option>';
+                                }
+                                if (response.data[i]['set_key'] == 'book_category') {
+                                    catstr += '<option value="' + response.data[i]['id'] + '">' + response.data[i]['set_value'] + '</option>';
+                                }
+                                dicts[response.data[i]['set_key']][response.data[i]['id']] = response.data[i]['set_value'];
+                            }
+                            if (dicts) {
+                                for (var j in dicts) {
+                                    dicts[j][-1] = '其它';
+                                }
+                                lanstr += '<option value="-1">其它</option>';
+                                catstr += '<option value="-1">其它</option>';
+                            }
+                            this.dictList = dicts;
+                            console.log(this.dictList);
+                            $("#language").html(lanstr);
+                            $("#category").html(catstr);
+                            // status 类型
+                            var statusstr = '<option value="0">--全部--</option>';
+                            for (var i in this.statusList) {
+                                statusstr += '<option value="' + i + '">' + this.statusList[i] + '</option>';
+                            }
+                            $("#status").html(statusstr);
+                        }).catch (function (error) {
+                            console.log(error);
+                        })
+            },
             getData: function () {
                 var params = {
                     'name' : this.name,
-                    'category' : this.category,
-                    'language' : this.language,
-                    'status' : this.status,
+                    'category' : $("#category").val(),
+                    'language' : $("#language").val(),
+                    'status' : $("#status").val(),
                     'pageNo' : this.page,
                     'pageSize' : this.pageSize
                 };
                 axios.post('/getbooklst', params)
                         .then((response) => {
                             this.listData = response.data.data;
+                            console.log(this.listData);
                             this.total = response.data.total;
                             this.setPageList(this.total, this.page, this.pageSize);
                         })
@@ -272,10 +302,8 @@
         data () {
             return {
                 name: '',
-                category: 0,
-                language: 0,
-                status: 0,
-
+                statusList:{1:'在架', 2:'借出', 3:'送人'},
+                dictList:[],
                 listData:[],
                 page: 1,//当前页码
                 pageSize: 10,//每页条数

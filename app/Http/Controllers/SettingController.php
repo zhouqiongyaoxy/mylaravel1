@@ -68,9 +68,16 @@ class SettingController extends Controller
         if (!$dict) {
             return ['code' => 0, 'msg' => '要删除的数据不存在'];
         }
-        $del = DB::table('dict')->where("id", $params['id'])
-            ->update(['deleted' => 1, 'updatetime' => date("Y-m-d H:i:s")]);
-        if (!$del) {
+        $bookField = explode('_', $params['set_key'])[1];
+        $updateBook = DB::table('books')->where($bookField, $params['id'])
+            ->update([$bookField => -1, 'updatetime' => date("Y-m-d H:i:s")]);
+        if ($updateBook) {
+            $del = DB::table('dict')->where("id", $params['id'])
+                ->update(['deleted' => 1, 'updatetime' => date("Y-m-d H:i:s")]);
+            if (!$del) {
+                return ['code' => 0, 'msg' => '删除数据失败'];
+            }
+        } else {
             return ['code' => 0, 'msg' => '删除数据失败'];
         }
         return $rs;
@@ -83,6 +90,9 @@ class SettingController extends Controller
         $wheres = [['deleted', 0]];
         if (!empty($params['set_key'])) {
             $wheres[] = ['set_key', $params['set_key']];
+        }
+        if (!empty($params['setkey_like'])) {
+            $wheres[] = ['set_key', 'like', $params['setkey_like'].'%'];
         }
         $dicts = DB::table('dict')->where($wheres)->get();
         return $dicts;

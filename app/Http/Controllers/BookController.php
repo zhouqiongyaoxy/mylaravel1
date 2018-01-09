@@ -14,9 +14,9 @@ class BookController extends Controller
         $params['pageSize'] = isset($params['pageSize']) ? $params['pageSize'] : 10;
        // $offset = ($params['pageNo'] - 1 ) * $params['pageSize'];
         $name = $params['name'];
-        $category = $params['category'];
-        $language = $params['language'];
-        $status = $params['status'];
+        $category = isset($params['category']) ? $params['category'] : 0 ;
+        $language = isset($params['language']) ? $params['language'] : 0 ;
+        $status = isset($params['status']) ? $params['status'] : 0 ;
         $rs = DB::table('books')
                     ->when($name, function ($query) use ($name){
                         return $query->where('name', 'like', '%'.$name.'%');
